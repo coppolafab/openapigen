@@ -1,0 +1,17 @@
+{
+    "name": "coppolafab/openapigen",
+    "description": "OpenApi generator",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Coppolafab\\OpenApi\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "coppolafab"
+        }
+    ],
+    "require": {}
+}
