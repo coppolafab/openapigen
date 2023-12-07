@@ -12,7 +12,7 @@ final readonly class Example implements JsonSerializable
     public function __construct(
         private ?string $summary = null,
         private ?string $description = null,
-        public ?string $value = null,
+        public mixed $value = null,
         private ?string $externalValue = null,
     ) {
         if ($value !== null && $externalValue !== null) {
