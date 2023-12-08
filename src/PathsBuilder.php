@@ -12,10 +12,8 @@ use function array_keys;
 
 final readonly class PathsBuilder
 {
-    public static function build(array $classMap, ?Components $components = null): Paths
+    public static function build(array $classMap, ?Components $components = null, array $paths = []): Paths
     {
-        $paths = [];
-
         foreach (array_keys($classMap) as $class) {
             $reflector = new ReflectionClass($class);
 
