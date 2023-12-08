@@ -10,7 +10,7 @@ use JsonSerializable;
 final readonly class MediaType implements JsonSerializable
 {
     public function __construct(
-        private ?Schema $schema = null,
+        private mixed $schema = null,
         private ?Example $example = null,
         private ?array $examples = null,
         private ?array $encoding = null,

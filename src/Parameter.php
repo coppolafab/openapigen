@@ -16,7 +16,7 @@ final readonly class Parameter
         private ?string $style = null,
         private bool $explode = false,
         private bool $allowReserved = false,
-        private ?Schema $schema = null,
+        private mixed $schema = null,
         private $example = null,
         private ?array $examples = null,
         private ?array $content = null,
