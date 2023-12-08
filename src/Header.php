@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Coppolafab\OpenApi;
 
-final readonly class Header
+use JsonSerializable;
+
+final readonly class Header implements JsonSerializable
 {
     public function __construct(
         private ?string $description = null,
@@ -19,5 +21,28 @@ final readonly class Header
         private ?array $examples = null,
         private ?array $content = null,
     ) {
+    }
+
+    public function jsonSerialize(): array
+    {
+        $header = [];
+
+        if ($this->description !== null) {
+            $header['description'] = $this->description;
+        }
+
+        if ($this->schema !== null) {
+            $header['schema'] = $this->schema;
+        }
+
+        if ($this->example !== null) {
+            $header['example'] = $this->example;
+        }
+
+        if ($this->examples !== null) {
+            $header['examples'] = $this->examples;
+        }
+
+        return $header;
     }
 }
