@@ -32,7 +32,10 @@ final readonly class SecurityScheme implements JsonSerializable
 
         $securityScheme['name'] = $this->name;
         $securityScheme['in'] = $this->in;
-        $securityScheme['scheme'] = $this->scheme;
+
+        if ($this->scheme !== null) {
+            $securityScheme['scheme'] = $this->scheme;
+        }
 
         if ($this->bearerFormat !== null) {
             $securityScheme['bearerFormat'] = $this->bearerFormat;

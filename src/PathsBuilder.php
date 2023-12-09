@@ -59,6 +59,7 @@ final readonly class PathsBuilder
                             requestBody: $operationAttrInstance->requestBody,
                             responses: $operationAttrInstance->responses,
                             deprecated: $operationAttrInstance->deprecated,
+                            security: $operationAttrInstance->security,
                         );
 
                         match ($operationAttrInstance->verb) {

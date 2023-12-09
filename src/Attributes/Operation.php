@@ -22,6 +22,7 @@ readonly class Operation
         public RequestBody|Reference|null $requestBody = null,
         public ?Responses $responses = null,
         public bool $deprecated = false,
+        public ?array $security = null,
     ) {
     }
 }
