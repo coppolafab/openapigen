@@ -12,9 +12,9 @@ final readonly class SecurityScheme implements JsonSerializable
         private SecuritySchemeType $type,
         private string $name,
         private ApiKeyLocation $in,
-        private string $scheme,
-        private OAuthFlows $flows,
-        private string $openIdConnectUrl,
+        private ?string $scheme = null,
+        private ?OAuthFlows $flows = null,
+        private ?string $openIdConnectUrl = null,
         private ?string $description = null,
         private ?string $bearerFormat = null,
     ) {
