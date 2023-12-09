@@ -52,6 +52,10 @@ final readonly class Operation implements JsonSerializable
             $operation['responses'] = $this->responses;
         }
 
+        if ($this->security !== null) {
+            $operation['security'] = $this->security;
+        }
+
         return $operation;
     }
 }

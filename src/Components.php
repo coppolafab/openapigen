@@ -30,6 +30,10 @@ final readonly class Components implements JsonSerializable
             $components['responses'] = $this->responses;
         }
 
+        if ($this->securitySchemes !== null) {
+            $components['securitySchemes'] = $this->securitySchemes;
+        }
+
         return $components;
     }
 }
