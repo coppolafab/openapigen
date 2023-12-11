@@ -26,6 +26,14 @@ final readonly class Response implements JsonSerializable
             $response['headers'] = $this->headers;
         }
 
+        if ($this->content !== null) {
+            $response['content'] = $this->content;
+        }
+
+        if ($this->links !== null) {
+            $response['links'] = $this->links;
+        }
+
         return $response;
     }
 }
