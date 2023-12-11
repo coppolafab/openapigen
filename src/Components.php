@@ -26,12 +26,44 @@ final readonly class Components implements JsonSerializable
     {
         $components = [];
 
+        if ($this->schemas !== null) {
+            $components['schemas'] = $this->schemas;
+        }
+
         if ($this->responses !== null) {
             $components['responses'] = $this->responses;
         }
 
+        if ($this->parameters !== null) {
+            $components['parameters'] = $this->parameters;
+        }
+
+        if ($this->examples !== null) {
+            $components['examples'] = $this->examples;
+        }
+
+        if ($this->requestBodies !== null) {
+            $components['requestBodies'] = $this->requestBodies;
+        }
+
+        if ($this->headers !== null) {
+            $components['headers'] = $this->headers;
+        }
+
         if ($this->securitySchemes !== null) {
             $components['securitySchemes'] = $this->securitySchemes;
+        }
+
+        if ($this->links !== null) {
+            $components['links'] = $this->links;
+        }
+
+        if ($this->callbacks !== null) {
+            $components['callbacks'] = $this->callbacks;
+        }
+
+        if ($this->pathItems !== null) {
+            $components['pathItems'] = $this->pathItems;
         }
 
         return $components;
