@@ -40,20 +40,40 @@ final readonly class Operation implements JsonSerializable
             $operation['description'] = $this->description;
         }
 
-        if ($this->requestBody !== null) {
-            $operation['requestBody'] = $this->requestBody;
+        if ($this->externalDocs !== null) {
+            $operation['externalDocs'] = $this->externalDocs;
         }
 
-        if ($this->deprecated !== null) {
-            $operation['deprecated'] = $this->deprecated;
+        if ($this->operationId !== null) {
+            $operation['operationId'] = $this->operationId;
+        }
+
+        if ($this->parameters !== null) {
+            $operation['parameters'] = $this->parameters;
+        }
+
+        if ($this->requestBody !== null) {
+            $operation['requestBody'] = $this->requestBody;
         }
 
         if ($this->responses !== null) {
             $operation['responses'] = $this->responses;
         }
 
+        if ($this->callbacks !== null) {
+            $operation['callbacks'] = $this->callbacks;
+        }
+
+        if ($this->deprecated !== null) {
+            $operation['deprecated'] = $this->deprecated;
+        }
+
         if ($this->security !== null) {
             $operation['security'] = $this->security;
+        }
+
+        if ($this->servers !== null) {
+            $operation['servers'] = $this->servers;
         }
 
         return $operation;
