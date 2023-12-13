@@ -56,6 +56,7 @@ final readonly class PathsBuilder
                             summary: $operationAttrInstance->summary,
                             description: $operationAttrInstance->description,
                             operationId: $operationAttrInstance->operationId,
+                            parameters: $operationAttrInstance->parameters,
                             requestBody: $operationAttrInstance->requestBody,
                             responses: $operationAttrInstance->responses,
                             deprecated: $operationAttrInstance->deprecated,

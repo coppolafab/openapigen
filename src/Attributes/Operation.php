@@ -19,6 +19,7 @@ readonly class Operation
         public ?string $summary = null,
         public ?string $description = null,
         public ?string $operationId = null,
+        public ?array $parameters = null,
         public RequestBody|Reference|null $requestBody = null,
         public ?Responses $responses = null,
         public bool $deprecated = false,
