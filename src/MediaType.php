@@ -9,6 +9,8 @@ use JsonSerializable;
 
 final readonly class MediaType implements JsonSerializable
 {
+    public const APPLICATION_JSON = 'application/json';
+
     public function __construct(
         private mixed $schema = null,
         private ?Example $example = null,
