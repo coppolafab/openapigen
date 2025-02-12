@@ -11,7 +11,7 @@ use Coppolafab\OpenApi\RequestBody;
 use Coppolafab\OpenApi\Responses;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
-readonly class Operation
+final readonly class Operation
 {
     public function __construct(
         public OperationVerb $verb,
