@@ -7,6 +7,17 @@ namespace Coppolafab\OpenApi;
 use Coppolafab\OpenApi\Attributes as OA;
 use Coppolafab\OpenApi\Components;
 use JsonSerializable;
+use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
+use PHPStan\PhpDocParser\Lexer\Lexer;
+use PHPStan\PhpDocParser\Parser\ConstExprParser;
+use PHPStan\PhpDocParser\Parser\PhpDocParser;
+use PHPStan\PhpDocParser\Parser\TokenIterator;
+use PHPStan\PhpDocParser\Parser\TypeParser;
+use PHPStan\PhpDocParser\ParserConfig;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -32,6 +43,12 @@ final readonly class ComponentsBuilder
 
     private static function buildSchemas(array $classMap, array $schemasReplacements): ?array
     {
+        $config = new ParserConfig(usedAttributes: []);
+        $lexer = new Lexer($config);
+        $constExprParser = new ConstExprParser($config);
+        $typeParser = new TypeParser($config, $constExprParser);
+        $phpDocParser = new PhpDocParser($config, $typeParser, $constExprParser);
+
         $schemaInfos = [];
 
         foreach (array_keys($classMap) as $class) {
@@ -64,26 +81,32 @@ final readonly class ComponentsBuilder
                     continue;
                 }
 
-                if (preg_match('/@return\s+array{\s*(.*)\s*}/', $docBlock, $matches, PREG_UNMATCHED_AS_NULL) === false) {
+                $tokens = new TokenIterator($lexer->tokenize($docBlock));
+                $phpDocNode = $phpDocParser->parse($tokens);
+                $returnTags = $phpDocNode->getReturnTagValues();
+
+                if (! $returnTags) {
                     continue;
                 }
 
-                if (preg_match_all("/'([^']+)':\s*(\??\w+(?:\[\]|<[^>]+>)?)/", $matches[1], $arrayFields, PREG_UNMATCHED_AS_NULL) === false) {
+                $returnTag = $returnTags[0];
+                $returnTagType = $returnTag->type;
+
+                if ($returnTagType->kind !== 'array') {
                     continue;
                 }
 
-                array_shift($arrayFields);
                 $properties = [];
                 $required = [];
-                $lenght = count($arrayFields[0]);
-                $i = 0;
 
-                for ($i = 0; $i < $lenght; $i++) {
-                    $propertyName = $arrayFields[0][$i];
-                    $typePart = $arrayFields[1][$i];
-                    $property = self::mapType($typePart);
+                foreach ($returnTagType->items as $item) {
+                    $propertyName = $item->keyName->value;
+                    $property = self::mapType($item->valueType);
                     $properties[$propertyName] = $property;
-                    $required[] = $propertyName;
+
+                    if (! $item->optional) {
+                        $required[] = $propertyName;
+                    }
                 }
 
                 $schema = [
@@ -131,34 +154,71 @@ final readonly class ComponentsBuilder
         return array_replace_recursive($schemas, $schemasReplacements);
     }
 
-    private static function mapType(string $typePart): array
+    private static function mapType(ArrayTypeNode|GenericTypeNode|IdentifierTypeNode|NullableTypeNode|UnionTypeNode $valueType): array
     {
-        $property = match($typePart) {
+        if ($valueType instanceof NullableTypeNode) {
+            $property = self::mapNullableType($valueType);
+        } elseif ($valueType instanceof GenericTypeNode) {
+            $property = self::mapType($valueType->type);
+            $property['items'] = self::mapType($valueType->genericTypes[1]);
+        } elseif ($valueType instanceof UnionTypeNode) {
+            $types = [];
+
+            foreach (array_map(fn ($type) => self::mapType($type), $valueType->types) as $type) {
+                $types[] = $type['type'];
+            }
+
+            $property = ['type' => array_unique($types)];
+        } elseif ($valueType instanceof ArrayTypeNode) {
+            $property = self::mapArrayType($valueType);
+        } elseif ($valueType instanceof IdentifierTypeNode) {
+            $property = self::mapIdentifierType($valueType);
+        } else {
+            $property = ['type' => 'object'];
+        }
+
+        return $property;
+    }
+
+    private static function mapNullableType(NullableTypeNode $typeNode): array
+    {
+        $property = self::mapType($typeNode->type);
+
+        if (isset($property['type'])) {
+            if (is_array($property['type']) && ! in_array('null', $property['type'], true)) {
+                $property['type'][] = 'null';
+            } elseif (! is_array($property['type']) && $property['type'] !== 'null') {
+                $property['type'] = [$property['type'], 'null'];
+            }
+        }
+            
+        $property['nullable'] = true;
+
+        return $property;
+    }
+
+    private static function mapArrayType(ArrayTypeNode $typeNode): array
+    {
+        return [
+            'type' => 'array',
+            'items' => self::mapType($typeNode->type),
+        ];
+    }
+
+    private static function mapIdentifierType(IdentifierTypeNode $typeNode): array
+    {
+        $name = $typeNode->name;
+
+        $property = match($name) {
             'null' => ['type' => 'null'],
-            'bool', '?bool', 'true', 'false' => ['type' => 'boolean'],
-            'bool[]' => ['type' => 'array', 'items' => ['type' => 'boolean']],
-            'int', '?int' => ['type' => 'integer'],
-            'int[]' => ['type' => 'array', 'items' => ['type' => 'integer']],
-            'float', '?float' => ['type' => 'number'],
-            'float[]' => ['type' => 'array', 'items' => ['type' => 'number']],
-            'string', '?string' => ['type' => 'string'],
-            'string[]' => ['type' => 'array', 'items' => ['type' => 'string']],
-            default => null,
+            'bool', 'true', 'false' => ['type' => 'boolean'],
+            'int' => ['type' => 'integer'],
+            'float' => ['type' => 'number'],
+            'string' => ['type' => 'string'],
+            'mixed' => ['type' => 'object'],
+            'array' => ['type' => 'array'],
+            default => ['unknown' => $name],
         };
-
-        $nullable = $typePart === 'null' || str_starts_with($typePart, '?');
-
-        if ($property) {
-            $property['nullable'] = $nullable;
-
-            return $property;
-        }
-
-        $property = ['unknown' => $typePart, 'nullable' => $nullable];
-
-        if (str_starts_with($typePart, 'array<') || str_ends_with($typePart, '[]')) {
-            $property['type'] = 'array';
-        }
 
         return $property;
     }
