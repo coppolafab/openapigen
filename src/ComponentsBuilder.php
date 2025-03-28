@@ -22,6 +22,7 @@ use ReflectionClass;
 use ReflectionMethod;
 
 use function array_replace_recursive;
+use function ksort;
 
 final readonly class ComponentsBuilder
 {
@@ -151,7 +152,10 @@ final readonly class ComponentsBuilder
             $schemas[$schemaInfo['schemaName']] = $schema;
         }
 
-        return array_replace_recursive($schemas, $schemasReplacements);
+        $schemas = array_replace_recursive($schemas, $schemasReplacements);
+        ksort($schemas);
+
+        return $schemas;
     }
 
     private static function mapType(ArrayTypeNode|GenericTypeNode|IdentifierTypeNode|NullableTypeNode|UnionTypeNode $valueType): array
