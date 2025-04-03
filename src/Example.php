@@ -20,6 +20,16 @@ final readonly class Example implements JsonSerializable
         }
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['summary'] ?? null,
+            $properties['description'] ?? null,
+            $properties['value'] ?? null,
+            $properties['externalValue'] ?? null,
+        );
+    }
+
     public function jsonSerialize(): array
     {
         $example = [];

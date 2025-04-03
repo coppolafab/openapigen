@@ -19,6 +19,15 @@ final readonly class License implements JsonSerializable
         }
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['name'],
+            $properties['identifier'] ?? null,
+            $properties['url'] ?? null,
+        );
+    }
+
     public function jsonSerialize(): array
     {
         $license = [

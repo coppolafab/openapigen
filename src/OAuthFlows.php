@@ -13,4 +13,14 @@ final readonly class OAuthFlows
         private ?OAuthFlow $authorizationCode = null,
     ) {
     }
+
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['implicit'] ?? null,
+            $properties['password'] ?? null,
+            $properties['clientCredentials'] ?? null,
+            $properties['authorizationCode'] ?? null,
+        );
+    }
 }

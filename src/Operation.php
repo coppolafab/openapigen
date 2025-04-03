@@ -24,6 +24,24 @@ final readonly class Operation implements JsonSerializable
     ) {
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['tags'] ?? null,
+            $properties['summary'] ?? null,
+            $properties['description'] ?? null,
+            $properties['externalDocs'] ?? null,
+            $properties['operationId'] ?? null,
+            $properties['parameters'] ?? null,
+            $properties['requestBody'] ?? null,
+            $properties['responses'] ?? null,
+            $properties['callbacks'] ?? null,
+            $properties['deprecated'] ?? false,
+            $properties['security'] ?? null,
+            $properties['servers'] ?? null,
+        );
+    }
+
     public function jsonSerialize(): array
     {
         $operation = [];

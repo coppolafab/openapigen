@@ -22,6 +22,22 @@ final readonly class OpenApi implements JsonSerializable
     ) {
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['openapi'],
+            $properties['info'],
+            $properties['jsonSchemaDialect'] ?? null,
+            $properties['servers'] ?? null,
+            $properties['paths'] ?? null,
+            $properties['webhooks'] ?? null,
+            $properties['components'] ?? null,
+            $properties['security'] ?? null,
+            $properties['tags'] ?? null,
+            $properties['externalDocs'] ?? null,
+        );
+    }
+
     public function jsonSerialize(): array
     {
         $openApi = [

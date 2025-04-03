@@ -12,4 +12,13 @@ final readonly class ServerVariable
         private ?string $description = null,
     ) {
     }
+
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['default'],
+            $properties['enum'] ?? null,
+            $properties['description'] ?? null,
+        );
+    }
 }

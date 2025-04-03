@@ -19,6 +19,19 @@ final readonly class Info implements JsonSerializable
     ) {
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['title'],
+            $properties['version'],
+            $properties['summary'] ?? null,
+            $properties['description'] ?? null,
+            $properties['termsOfService'] ?? null,
+            $properties['contact'] ?? null,
+            $properties['license'] ?? null,
+        );
+    }
+
     public function jsonSerialize(): array
     {
         $info = [

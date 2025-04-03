@@ -22,6 +22,22 @@ final readonly class Components implements JsonSerializable
     ) {
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['schemas'] ?? null,
+            $properties['responses'] ?? null,
+            $properties['parameters'] ?? null,
+            $properties['examples'] ?? null,
+            $properties['requestBodies'] ?? null,
+            $properties['headers'] ?? null,
+            $properties['securitySchemes'] ?? null,
+            $properties['links'] ?? null,
+            $properties['callbacks'] ?? null,
+            $properties['pathItems'] ?? null,
+        );
+    }
+
     public function jsonSerialize(): array
     {
         $components = [];

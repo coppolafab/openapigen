@@ -15,4 +15,16 @@ final readonly class Link
         private ?Server $server = null,
     ) {
     }
+
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['operationRef'] ?? null,
+            $properties['operationId'] ?? null,
+            $properties['parameters'] ?? null,
+            $properties['requestBody'] ?? null,
+            $properties['description'] ?? null,
+            $properties['server'] ?? null,
+        );
+    }
 }

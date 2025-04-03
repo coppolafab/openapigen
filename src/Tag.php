@@ -12,4 +12,13 @@ final readonly class Tag
         private ?ExternalDocumentation $externalDocs = null,
     ) {
     }
+
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['name'],
+            $properties['description'] ?? null,
+            $properties['externalDocs'] ?? null,
+        );
+    }
 }

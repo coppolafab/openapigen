@@ -13,4 +13,14 @@ final readonly class OAuthFlow
         private ?string $refreshUrl = null,
     ) {
     }
+
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['authorizationUrl'],
+            $properties['tokenUrl'],
+            $properties['scopes'],
+            $properties['refreshUrl'] ?? null,
+        );
+    }
 }

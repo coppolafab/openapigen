@@ -23,6 +23,23 @@ final readonly class Header implements JsonSerializable
     ) {
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['description'] ?? null,
+            $properties['required'] ?? false,
+            $properties['deprecated'] ?? false,
+            $properties['allowEmptyValue'] ?? false,
+            $properties['style'] ?? null,
+            $properties['explode'] ?? false,
+            $properties['allowReserved'] ?? false,
+            $properties['schema'] ?? null,
+            $properties['example'] ?? null,
+            $properties['examples'] ?? null,
+            $properties['content'] ?? null,
+        );
+    }
+
     public function jsonSerialize(): array
     {
         $header = [];

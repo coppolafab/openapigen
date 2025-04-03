@@ -25,6 +25,25 @@ final class PathItem implements JsonSerializable
     ) {
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['ref'] ?? null,
+            $properties['summary'] ?? null,
+            $properties['description'] ?? null,
+            $properties['get'] ?? null,
+            $properties['put'] ?? null,
+            $properties['post'] ?? null,
+            $properties['delete'] ?? null,
+            $properties['options'] ?? null,
+            $properties['head'] ?? null,
+            $properties['patch'] ?? null,
+            $properties['trace'] ?? null,
+            $properties['servers'] ?? null,
+            $properties['parameters'] ?? null,
+        );
+    }
+
     public function setGet(?Operation $get): void
     {
         $this->get = $get;

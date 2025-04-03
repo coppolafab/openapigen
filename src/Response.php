@@ -16,6 +16,16 @@ final readonly class Response implements JsonSerializable
     ) {
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['description'],
+            $properties['headers'] ?? null,
+            $properties['content'] ?? null,
+            $properties['links'] ?? null,
+        );
+    }
+
     public function jsonSerialize(): array
     {
         $response = [

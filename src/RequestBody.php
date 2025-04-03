@@ -15,6 +15,15 @@ final readonly class RequestBody implements JsonSerializable
     ) {
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['content'],
+            $properties['description'] ?? null,
+            $properties['required'] ?? false,
+        );
+    }
+
     public function jsonSerialize(): array
     {
         $requestBody = [];

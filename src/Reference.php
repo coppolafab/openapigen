@@ -15,6 +15,15 @@ final readonly class Reference implements JsonSerializable
     ) {
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['ref'],
+            $properties['summary'] ?? null,
+            $properties['description'] ?? null,
+        );
+    }
+
     public function jsonSerialize(): array
     {
         $reference = [

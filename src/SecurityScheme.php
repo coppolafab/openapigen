@@ -20,6 +20,20 @@ final readonly class SecurityScheme implements JsonSerializable
     ) {
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['type'],
+            $properties['name'],
+            $properties['in'],
+            $properties['scheme'] ?? null,
+            $properties['flows'] ?? null,
+            $properties['openIdConnectUrl'] ?? null,
+            $properties['description'] ?? null,
+            $properties['bearerFormat'] ?? null,
+        );
+    }
+
     public function jsonSerialize(): array
     {
         $securityScheme = [

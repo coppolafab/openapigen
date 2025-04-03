@@ -12,6 +12,11 @@ final readonly class Responses implements JsonSerializable
     {
     }
 
+    public static function __set_state(array $properties): self
+    {
+        return new self($properties['responses'] ?? null);
+    }
+
     public function jsonSerialize(): array
     {
         return $this->responses;

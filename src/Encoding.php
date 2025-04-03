@@ -14,4 +14,15 @@ final readonly class Encoding
         private bool $allowReserved = false,
     ) {
     }
+
+    public static function __set_state(array $properties): self
+    {
+        return new self(
+            $properties['contentType'] ?? null,
+            $properties['headers'] ?? null,
+            $properties['style'] ?? null,
+            $properties['explode'] ?? false,
+            $properties['allowReserved'] ?? false,
+        );
+    }
 }
