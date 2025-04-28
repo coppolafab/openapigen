@@ -147,6 +147,16 @@ final readonly class ComponentsBuilder
 
                     unset($property['unknown']);
                 }
+
+                if (isset($property['type']) && $property['type'] === 'array' && isset($property['items'], $property['items']['unknown'])) {
+                    if (isset($schemaInfos[$property['items']['unknown']])) {
+                        $schema['properties'][$propertyName]['items'] = ['$ref' => '#/components/schemas/' . $property['items']['unknown']];
+                    } else {
+                        $schema['properties'][$propertyName]['items'] = ['type' => 'object'];
+                    }
+
+                    unset($property['items']['unknown']);
+                }
             }
 
             $schemas[$schemaInfo['schemaName']] = $schema;
