@@ -7,6 +7,7 @@ namespace Coppolafab\OpenApi;
 use Coppolafab\OpenApi\Attributes as OA;
 use Coppolafab\OpenApi\Components;
 use JsonSerializable;
+use Nette\Utils\Reflection;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
@@ -19,6 +20,7 @@ use PHPStan\PhpDocParser\Parser\TokenIterator;
 use PHPStan\PhpDocParser\Parser\TypeParser;
 use PHPStan\PhpDocParser\ParserConfig;
 use ReflectionClass;
+use ReflectionEnum;
 use ReflectionMethod;
 
 use function array_replace_recursive;
@@ -93,7 +95,7 @@ final readonly class ComponentsBuilder
                 $returnTag = $returnTags[0];
                 $returnTagType = $returnTag->type;
 
-                if ($returnTagType->kind !== 'array') {
+                if ($returnTagType->kind !== 'array' && $returnTagType->kind !== 'non-empty-array') {
                     continue;
                 }
 
@@ -125,6 +127,7 @@ final readonly class ComponentsBuilder
             $schemaInfos[$schemaName] = [
                 'schemaName' => $schemaName,
                 'schema' => $schema,
+                'classReflector' => $reflector,
             ];
         }
 
@@ -139,10 +142,17 @@ final readonly class ComponentsBuilder
                 if (isset($property['unknown'])) {
                     if (! isset($property['type']) && isset($schemaInfos[$property['unknown']])) {
                         $schema['properties'][$propertyName] = ['$ref' => '#/components/schemas/' . $property['unknown']];
-                    } elseif (isset($property['type']) && ! isset($property['items']) && isset($schemaInfos[$property['unknown']])) {
-                        $schema['properties'][$propertyName]['items'] = ['$ref' => '#/components/schemas/' . $property['unknown']];
                     } else {
-                        $schema['properties'][$propertyName] = ['type' => 'object'];
+                        $expandedClassName = Reflection::expandClassName($property['unknown'], $schemaInfo['classReflector']);
+
+                        if ($expandedClassName && enum_exists($expandedClassName)) {
+                            $reflectionEnum = new ReflectionEnum($expandedClassName);
+                            $type = $reflectionEnum->getBackingType()->getName() === 'int' ? 'integer' : 'string';
+                            $cases = array_column($expandedClassName::cases(), 'name');
+                            $schema['properties'][$propertyName] = ['type' => $type, 'enum' => $cases];
+                        } else {
+                            $schema['properties'][$propertyName] = ['type' => 'object'];
+                        }
                     }
 
                     unset($property['unknown']);
@@ -152,7 +162,16 @@ final readonly class ComponentsBuilder
                     if (isset($schemaInfos[$property['items']['unknown']])) {
                         $schema['properties'][$propertyName]['items'] = ['$ref' => '#/components/schemas/' . $property['items']['unknown']];
                     } else {
-                        $schema['properties'][$propertyName]['items'] = ['type' => 'object'];
+                        $expandedClassName = Reflection::expandClassName($property['items']['unknown'], $schemaInfo['classReflector']);
+
+                        if ($expandedClassName && enum_exists($expandedClassName)) {
+                            $reflectionEnum = new ReflectionEnum($expandedClassName);
+                            $type = $reflectionEnum->getBackingType()->getName() === 'int' ? 'integer' : 'string';
+                            $cases = array_column($expandedClassName::cases(), 'name');
+                            $schema['properties'][$propertyName]['items'] = ['type' => $type, 'enum' => $cases];
+                        } else {
+                            $schema['properties'][$propertyName]['items'] = ['type' => 'object'];
+                        }
                     }
 
                     unset($property['items']['unknown']);
@@ -205,7 +224,7 @@ final readonly class ComponentsBuilder
                 $property['type'] = [$property['type'], 'null'];
             }
         }
-            
+
         $property['nullable'] = true;
 
         return $property;
