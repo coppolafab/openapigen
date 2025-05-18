@@ -115,6 +115,7 @@ final readonly class ComponentsBuilder
                 $schema = [
                     'type' => 'object',
                     'properties' => $properties,
+                    'additionalProperties' => false,
                 ];
 
                 if ($required) {
