@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Coppolafab\OpenApi;
 
 use JsonSerializable;
+use Override;
 
 final readonly class Reference implements JsonSerializable
 {
@@ -24,6 +25,12 @@ final readonly class Reference implements JsonSerializable
         );
     }
 
+    public function getRef(): string
+    {
+        return $this->ref;
+    }
+
+    #[Override]
     public function jsonSerialize(): array
     {
         $reference = [

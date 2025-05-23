@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Coppolafab\OpenApi;
 
 use JsonSerializable;
+use Override;
 
 final readonly class Parameter implements JsonSerializable
 {
@@ -44,6 +45,42 @@ final readonly class Parameter implements JsonSerializable
         );
     }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getIn(): ParameterLocation
+    {
+        return $this->in;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function isRequired(): bool
+    {
+        return $this->required;
+    }
+
+    public function isDeprecated(): bool
+    {
+        return $this->deprecated;
+    }
+
+    public function getStyle(): ?string
+    {
+        return $this->style;
+    }
+
+    public function getSchema(): mixed
+    {
+        return $this->schema;
+    }
+
+    #[Override]
     public function jsonSerialize(): array
     {
         $parameter = [

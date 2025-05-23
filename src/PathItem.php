@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Coppolafab\OpenApi;
 
 use JsonSerializable;
+use Override;
 
 final class PathItem implements JsonSerializable
 {
@@ -44,9 +45,19 @@ final class PathItem implements JsonSerializable
         );
     }
 
+    public function getGet(): ?Operation
+    {
+        return $this->get;
+    }
+
     public function setGet(?Operation $get): void
     {
         $this->get = $get;
+    }
+
+    public function getPut(): ?Operation
+    {
+        return $this->put;
     }
 
     public function setPut(?Operation $put): void
@@ -54,9 +65,19 @@ final class PathItem implements JsonSerializable
         $this->put = $put;
     }
 
+    public function getPost(): ?Operation
+    {
+        return $this->post;
+    }
+
     public function setPost(?Operation $post): void
     {
         $this->post = $post;
+    }
+
+    public function getDelete(): ?Operation
+    {
+        return $this->delete;
     }
 
     public function setDelete(?Operation $delete): void
@@ -64,9 +85,19 @@ final class PathItem implements JsonSerializable
         $this->delete = $delete;
     }
 
+    public function getOptions(): ?Operation
+    {
+        return $this->options;
+    }
+
     public function setOptions(?Operation $options): void
     {
         $this->options = $options;
+    }
+
+    public function getHead(): ?Operation
+    {
+        return $this->head;
     }
 
     public function setHead(?Operation $head): void
@@ -74,9 +105,19 @@ final class PathItem implements JsonSerializable
         $this->head = $head;
     }
 
+    public function getPatch(): ?Operation
+    {
+        return $this->patch;
+    }
+
     public function setPatch(?Operation $patch): void
     {
         $this->patch = $patch;
+    }
+
+    public function getTrace(): ?Operation
+    {
+        return $this->trace;
     }
 
     public function setTrace(?Operation $trace): void
@@ -84,6 +125,22 @@ final class PathItem implements JsonSerializable
         $this->trace = $trace;
     }
 
+    public function getRef(): ?string
+    {
+        return $this->ref;
+    }
+
+    public function getSummary(): ?string
+    {
+        return $this->summary;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    #[Override]
     public function jsonSerialize(): array
     {
         $pathItem = [];

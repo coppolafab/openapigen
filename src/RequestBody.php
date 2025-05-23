@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Coppolafab\OpenApi;
 
 use JsonSerializable;
+use Override;
 
 final readonly class RequestBody implements JsonSerializable
 {
@@ -24,6 +25,22 @@ final readonly class RequestBody implements JsonSerializable
         );
     }
 
+    public function getContent(): array
+    {
+        return $this->content;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function isRequired(): bool
+    {
+        return $this->required;
+    }
+
+    #[Override]
     public function jsonSerialize(): array
     {
         $requestBody = [];

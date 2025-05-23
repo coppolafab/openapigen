@@ -6,6 +6,7 @@ namespace Coppolafab\OpenApi;
 
 use InvalidArgumentException;
 use JsonSerializable;
+use Override;
 
 final readonly class Example implements JsonSerializable
 {
@@ -30,6 +31,12 @@ final readonly class Example implements JsonSerializable
         );
     }
 
+    public function getValue(): mixed
+    {
+        return $this->value;
+    }
+
+    #[Override]
     public function jsonSerialize(): array
     {
         $example = [];

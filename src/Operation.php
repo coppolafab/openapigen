@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Coppolafab\OpenApi;
 
 use JsonSerializable;
+use Override;
 
 final readonly class Operation implements JsonSerializable
 {
@@ -42,6 +43,42 @@ final readonly class Operation implements JsonSerializable
         );
     }
 
+    public function getSummary(): ?string
+    {
+        return $this->summary;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getOperationId(): ?string
+    {
+        return $this->operationId;
+    }
+
+    public function getParameters(): ?array
+    {
+        return $this->parameters;
+    }
+
+    public function getRequestBody(): RequestBody|Reference|null
+    {
+        return $this->requestBody;
+    }
+
+    public function getDeprecated(): bool
+    {
+        return $this->deprecated;
+    }
+
+    public function getSecurity(): ?array
+    {
+        return $this->security;
+    }
+
+    #[Override]
     public function jsonSerialize(): array
     {
         $operation = [];

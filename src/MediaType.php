@@ -6,6 +6,7 @@ namespace Coppolafab\OpenApi;
 
 use InvalidArgumentException;
 use JsonSerializable;
+use Override;
 
 final readonly class MediaType implements JsonSerializable
 {
@@ -32,6 +33,17 @@ final readonly class MediaType implements JsonSerializable
         );
     }
 
+    public function getSchema(): mixed
+    {
+        return $this->schema;
+    }
+
+    public function getExamples(): ?array
+    {
+        return $this->examples;
+    }
+
+    #[Override]
     public function jsonSerialize(): array
     {
         $mediaType = [];

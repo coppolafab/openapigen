@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Coppolafab\OpenApi;
 
 use JsonSerializable;
+use Override;
 
 final readonly class Components implements JsonSerializable
 {
@@ -38,6 +39,17 @@ final readonly class Components implements JsonSerializable
         );
     }
 
+    public function getSchemas(): ?array
+    {
+        return $this->schemas;
+    }
+
+    public function getParameters(): ?array
+    {
+        return $this->parameters;
+    }
+
+    #[Override]
     public function jsonSerialize(): array
     {
         $components = [];

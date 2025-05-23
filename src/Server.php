@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Coppolafab\OpenApi;
 
 use JsonSerializable;
+use Override;
 
 final readonly class Server implements JsonSerializable
 {
@@ -24,6 +25,17 @@ final readonly class Server implements JsonSerializable
         );
     }
 
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    #[Override]
     public function jsonSerialize(): array
     {
         $server = [

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Coppolafab\OpenApi;
 
 use JsonSerializable;
+use Override;
 
 final readonly class SecurityRequirement implements JsonSerializable
 {
@@ -17,6 +18,12 @@ final readonly class SecurityRequirement implements JsonSerializable
         return new self($properties['schemes'] ?? []);
     }
 
+    public function getSchemes(): array
+    {
+        return $this->schemes;
+    }
+
+    #[Override]
     public function jsonSerialize(): array
     {
         return $this->schemes;
