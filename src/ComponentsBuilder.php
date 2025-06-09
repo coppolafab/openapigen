@@ -68,11 +68,10 @@ final readonly class ComponentsBuilder
             }
 
             $schemaAttrInstance = $schemaAttributes[0]->newInstance();
-            $schemaName = null;
+            $schemaName = $schemaAttrInstance->name ?? $reflector->getShortName();
             $schema = null;
 
             if ($schemaAttrInstance->schema) {
-                $schemaName = $schemaAttrInstance->name;
                 $schema = $schemaAttrInstance->schema;
             } else if (! $reflector->implementsInterface(JsonSerializable::class)) {
                 continue;
@@ -115,14 +114,12 @@ final readonly class ComponentsBuilder
                 $schema = [
                     'type' => 'object',
                     'properties' => $properties,
-                    'additionalProperties' => false,
+                    'additionalProperties' => $schemaAttrInstance->additionalProperties,
                 ];
 
                 if ($required) {
                     $schema['required'] = $required;
                 }
-
-                $schemaName = $reflector->getShortName();
             }
 
             $schemaInfos[$schemaName] = [

@@ -13,6 +13,7 @@ final readonly class Schema
     public function __construct(
         public ?string $name = null,
         public ?array $schema = null,
+        public bool $additionalProperties = false,
     ) {
         if ($schema && ! $name) {
             throw new InvalidArgumentException('When schema is provided, name cannot be empty');
