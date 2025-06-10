@@ -8,15 +8,12 @@ use Iterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
-use function defined;
 use function file_get_contents;
 use function in_array;
 use function is_string;
 use function ltrim;
-use function pathinfo;
 use function token_get_all;
 
-use const PATHINFO_EXTENSION;
 use const T_CLASS;
 use const T_COMMENT;
 use const T_DOC_COMMENT;
@@ -31,48 +28,47 @@ use const T_WHITESPACE;
 
 final readonly class ClassMapBuilder
 {
-    public static function build(Iterator|string $dir): array
+    public static function build(Iterator|string|array $dirs): array
     {
-        if (is_string($dir)) {
-            $dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
-        }
-
         $map = [];
 
-        foreach ($dir as $file) {
-            if (! $file->isFile()) {
-                continue;
+        if (is_string($dirs) || $dirs instanceof Iterator) {
+            $dirs = [$dirs];
+        }
+
+        foreach ($dirs as $dir) {
+            $iterator = $dir;
+
+            if (is_string($dir)) {
+                $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
             }
 
-            $path = $file->getRealPath() ?: $file->getPathname();
+            foreach ($iterator as $file) {
+                if (! $file->isFile() || $file->getExtension() !== 'php') {
+                    continue;
+                }
 
-            if (pathinfo($path, PATHINFO_EXTENSION) !== 'php') {
-                continue;
-            }
+                $path = $file->getRealPath() ?: $file->getPathname();
+                $definitions = self::findDefinitions($path);
 
-            $classes = self::findClasses($path);
-
-            foreach ($classes as $class) {
-                $map[$class] = $path;
+                foreach ($definitions as $definition) {
+                    $map[$definition] = $path;
+                }
             }
         }
 
         return $map;
     }
 
-    private static function findClasses(string $path): array
+    private static function findDefinitions(string $path): array
     {
         $contents = file_get_contents($path);
         $tokens = token_get_all($contents);
+        $nsTokens = [T_STRING => true, T_NS_SEPARATOR => true, T_NAME_QUALIFIED => true];
 
-        $nsTokens = [T_STRING => true, T_NS_SEPARATOR => true];
-        if (defined('T_NAME_QUALIFIED')) {
-            $nsTokens[T_NAME_QUALIFIED] = true;
-        }
-
-        $classes = [];
-
+        $definitions = [];
         $namespace = '';
+
         for ($i = 0; isset($tokens[$i]); $i++) {
             $token = $tokens[$i];
 
@@ -95,12 +91,15 @@ final readonly class ClassMapBuilder
                     }
 
                     $namespace .= '\\';
+
                     break;
                 case T_CLASS:
                 case T_INTERFACE:
                 case T_TRAIT:
+                case T_ENUM:
                     // Skip usage of ::class constant
                     $isClassConstant = false;
+
                     for ($j = $i - 1; $j > 0; $j--) {
                         if (! isset($tokens[$j][1])) {
                             break;
@@ -108,6 +107,7 @@ final readonly class ClassMapBuilder
 
                         if ($tokens[$j][0] === T_DOUBLE_COLON) {
                             $isClassConstant = true;
+
                             break;
                         }
 
@@ -120,9 +120,10 @@ final readonly class ClassMapBuilder
                         break;
                     }
 
-                    // Find the classname
+                    // Find the class/enum name
                     while (isset($tokens[++$i][1])) {
                         $t = $tokens[$i];
+
                         if ($t[0] === T_STRING) {
                             $class .= $t[1];
                         } elseif ($class !== '' && $t[0] === T_WHITESPACE) {
@@ -130,13 +131,14 @@ final readonly class ClassMapBuilder
                         }
                     }
 
-                    $classes[] = ltrim($namespace . $class, '\\');
+                    $definitions[] = ltrim($namespace . $class, '\\');
+
                     break;
                 default:
                     break;
             }
         }
 
-        return $classes;
+        return $definitions;
     }
 }

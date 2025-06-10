@@ -74,7 +74,18 @@ final readonly class ComponentsBuilder
             if ($schemaAttrInstance->schema) {
                 $schema = $schemaAttrInstance->schema;
             } else if (! $reflector->implementsInterface(JsonSerializable::class)) {
-                continue;
+                if ($reflector->isEnum()) {
+                    $reflectionEnum = new ReflectionEnum($reflector->getName());
+                    $type = $reflectionEnum->getBackingType()->getName() === 'int' ? 'integer' : 'string';
+                    $cases = array_column($reflector->getName()::cases(), 'value');
+
+                    $schema = [
+                        'type' => $type,
+                        'enum' => $cases,
+                    ];
+                } else {
+                    continue;
+                }
             } else {
                 $method = new ReflectionMethod($reflector->getName(), 'jsonSerialize');
                 $docBlock = $method->getDocComment();
@@ -136,43 +147,45 @@ final readonly class ComponentsBuilder
         foreach ($schemaInfos as $schemaInfo) {
             $schema = $schemaInfo['schema'];
 
-            foreach ($schema['properties'] as $propertyName => $property) {
-                if (isset($property['unknown'])) {
-                    if (! isset($property['type']) && isset($schemaInfos[$property['unknown']])) {
-                        $schema['properties'][$propertyName] = ['$ref' => '#/components/schemas/' . $property['unknown']];
-                    } else {
-                        $expandedClassName = Reflection::expandClassName($property['unknown'], $schemaInfo['classReflector']);
-
-                        if ($expandedClassName && enum_exists($expandedClassName)) {
-                            $reflectionEnum = new ReflectionEnum($expandedClassName);
-                            $type = $reflectionEnum->getBackingType()->getName() === 'int' ? 'integer' : 'string';
-                            $cases = array_column($expandedClassName::cases(), 'name');
-                            $schema['properties'][$propertyName] = ['type' => $type, 'enum' => $cases];
+            if (isset($schema['properties'])) {
+                foreach ($schema['properties'] as $propertyName => $property) {
+                    if (isset($property['unknown'])) {
+                        if (! isset($property['type']) && isset($schemaInfos[$property['unknown']])) {
+                            $schema['properties'][$propertyName] = ['$ref' => '#/components/schemas/' . $property['unknown']];
                         } else {
-                            $schema['properties'][$propertyName] = ['type' => 'object'];
+                            $expandedClassName = Reflection::expandClassName($property['unknown'], $schemaInfo['classReflector']);
+
+                            if ($expandedClassName && enum_exists($expandedClassName)) {
+                                $reflectionEnum = new ReflectionEnum($expandedClassName);
+                                $type = $reflectionEnum->getBackingType()->getName() === 'int' ? 'integer' : 'string';
+                                $cases = array_column($expandedClassName::cases(), 'value');
+                                $schema['properties'][$propertyName] = ['type' => $type, 'enum' => $cases];
+                            } else {
+                                $schema['properties'][$propertyName] = ['type' => 'object'];
+                            }
                         }
+
+                        unset($property['unknown']);
                     }
 
-                    unset($property['unknown']);
-                }
-
-                if (isset($property['type']) && $property['type'] === 'array' && isset($property['items'], $property['items']['unknown'])) {
-                    if (isset($schemaInfos[$property['items']['unknown']])) {
-                        $schema['properties'][$propertyName]['items'] = ['$ref' => '#/components/schemas/' . $property['items']['unknown']];
-                    } else {
-                        $expandedClassName = Reflection::expandClassName($property['items']['unknown'], $schemaInfo['classReflector']);
-
-                        if ($expandedClassName && enum_exists($expandedClassName)) {
-                            $reflectionEnum = new ReflectionEnum($expandedClassName);
-                            $type = $reflectionEnum->getBackingType()->getName() === 'int' ? 'integer' : 'string';
-                            $cases = array_column($expandedClassName::cases(), 'name');
-                            $schema['properties'][$propertyName]['items'] = ['type' => $type, 'enum' => $cases];
+                    if (isset($property['type']) && $property['type'] === 'array' && isset($property['items'], $property['items']['unknown'])) {
+                        if (isset($schemaInfos[$property['items']['unknown']])) {
+                            $schema['properties'][$propertyName]['items'] = ['$ref' => '#/components/schemas/' . $property['items']['unknown']];
                         } else {
-                            $schema['properties'][$propertyName]['items'] = ['type' => 'object'];
-                        }
-                    }
+                            $expandedClassName = Reflection::expandClassName($property['items']['unknown'], $schemaInfo['classReflector']);
 
-                    unset($property['items']['unknown']);
+                            if ($expandedClassName && enum_exists($expandedClassName)) {
+                                $reflectionEnum = new ReflectionEnum($expandedClassName);
+                                $type = $reflectionEnum->getBackingType()->getName() === 'int' ? 'integer' : 'string';
+                                $cases = array_column($expandedClassName::cases(), 'value');
+                                $schema['properties'][$propertyName]['items'] = ['type' => $type, 'enum' => $cases];
+                            } else {
+                                $schema['properties'][$propertyName]['items'] = ['type' => 'object'];
+                            }
+                        }
+
+                        unset($property['items']['unknown']);
+                    }
                 }
             }
 
