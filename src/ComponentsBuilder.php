@@ -21,9 +21,17 @@ use PHPStan\PhpDocParser\Parser\TypeParser;
 use PHPStan\PhpDocParser\ParserConfig;
 use ReflectionClass;
 use ReflectionEnum;
+use ReflectionException;
 use ReflectionMethod;
 
+use function array_column;
+use function array_keys;
+use function array_map;
 use function array_replace_recursive;
+use function array_unique;
+use function enum_exists;
+use function in_array;
+use function is_array;
 use function ksort;
 
 final readonly class ComponentsBuilder
@@ -115,11 +123,33 @@ final readonly class ComponentsBuilder
                 foreach ($returnTagType->items as $item) {
                     $propertyName = $item->keyName->value;
                     $property = self::mapType($item->valueType);
-                    $properties[$propertyName] = $property;
 
                     if (! $item->optional) {
                         $required[] = $propertyName;
                     }
+
+                    if (isset($property['type']) && ($property['type'] === 'string' || is_array($property['type']) && in_array('string', $property['type'], true))) {
+                        $reflectionProperty = null;
+
+                        try {
+                            $reflectionProperty = $reflector->getProperty($propertyName);
+                        } catch (ReflectionException) {
+                        }
+
+                        if ($reflectionProperty) {
+                            $propertyAttributes = $reflectionProperty->getAttributes(OA\Schema\Property::class);
+
+                            if ($propertyAttributes) {
+                                $propertyAttrInstance = $propertyAttributes[0]->newInstance();
+
+                                if ($propertyAttrInstance->format) {
+                                    $property['format'] = $propertyAttrInstance->format;
+                                }
+                            }
+                        }
+                    }
+
+                    $properties[$propertyName] = $property;
                 }
 
                 $schema = [
@@ -235,8 +265,6 @@ final readonly class ComponentsBuilder
                 $property['type'] = [$property['type'], 'null'];
             }
         }
-
-        $property['nullable'] = true;
 
         return $property;
     }
