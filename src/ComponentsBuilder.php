@@ -180,10 +180,20 @@ final readonly class ComponentsBuilder
             if (isset($schema['properties'])) {
                 foreach ($schema['properties'] as $propertyName => $property) {
                     if (isset($property['unknown'])) {
-                        if (! isset($property['type']) && isset($schemaInfos[$property['unknown']])) {
-                            $schema['properties'][$propertyName] = ['$ref' => '#/components/schemas/' . $property['unknown']];
+                        $unknownClass = $property['unknown'];
+                        unset($property['unknown']);
+
+                        if (isset($schemaInfos[$unknownClass])) {
+                            if (! isset($property['type'])) {
+                                $schema['properties'][$propertyName] = ['$ref' => '#/components/schemas/' . $unknownClass];
+                            } elseif (is_array($property['type'])) {
+                                $schema['properties'][$propertyName] = ['anyOf' => [
+                                    $property,
+                                    ['$ref' => '#/components/schemas/' . $unknownClass],
+                                ]];
+                            }
                         } else {
-                            $expandedClassName = Reflection::expandClassName($property['unknown'], $schemaInfo['classReflector']);
+                            $expandedClassName = Reflection::expandClassName($unknownClass, $schemaInfo['classReflector']);
 
                             if ($expandedClassName && enum_exists($expandedClassName)) {
                                 $reflectionEnum = new ReflectionEnum($expandedClassName);
@@ -194,8 +204,6 @@ final readonly class ComponentsBuilder
                                 $schema['properties'][$propertyName] = ['type' => 'object'];
                             }
                         }
-
-                        unset($property['unknown']);
                     }
 
                     if (isset($property['type']) && $property['type'] === 'array' && isset($property['items'], $property['items']['unknown'])) {
@@ -264,6 +272,8 @@ final readonly class ComponentsBuilder
             } elseif (! is_array($property['type']) && $property['type'] !== 'null') {
                 $property['type'] = [$property['type'], 'null'];
             }
+        } else {
+            $property['type'] = ['null'];
         }
 
         return $property;
