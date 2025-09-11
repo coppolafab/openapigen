@@ -64,11 +64,6 @@ final readonly class ComponentsBuilder
 
         foreach (array_keys($classMap) as $class) {
             $reflector = new ReflectionClass($class);
-
-            if ($reflector->isAbstract()) {
-                continue;
-            }
-
             $schemaAttributes = $reflector->getAttributes(OA\Schema::class);
 
             if (! $schemaAttributes) {
@@ -81,7 +76,9 @@ final readonly class ComponentsBuilder
 
             if ($schemaAttrInstance->schema) {
                 $schema = $schemaAttrInstance->schema;
-            } else if (! $reflector->implementsInterface(JsonSerializable::class)) {
+            } elseif ($reflector->isAbstract()) {
+                continue;
+            } elseif (! $reflector->implementsInterface(JsonSerializable::class)) {
                 if ($reflector->isEnum()) {
                     $reflectionEnum = new ReflectionEnum($reflector->getName());
                     $type = $reflectionEnum->getBackingType()->getName() === 'int' ? 'integer' : 'string';
