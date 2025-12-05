@@ -38,11 +38,13 @@ final readonly class ComponentsBuilder
 {
     public static function build(array $classMap, array $componentsConfigs = []): Components
     {
+        $schemasExamples = [];
+
         return new Components(
-            self::buildSchemas($classMap, $componentsConfigs['schemas'] ?? []),
+            self::buildSchemas($classMap, $componentsConfigs['schemas'] ?? [], $schemasExamples),
             $componentsConfigs['responses'] ?? null,
             $componentsConfigs['parameters'] ?? null,
-            $componentsConfigs['examples'] ?? null,
+            $componentsConfigs['examples'] ?? $schemasExamples,
             $componentsConfigs['requestBodies'] ?? null,
             $componentsConfigs['headers'] ?? null,
             $componentsConfigs['securitySchemes'] ?? null,
@@ -52,7 +54,7 @@ final readonly class ComponentsBuilder
         );
     }
 
-    private static function buildSchemas(array $classMap, array $schemasReplacements): ?array
+    private static function buildSchemas(array $classMap, array $schemasReplacements, array &$schemasExamples = []): ?array
     {
         $config = new ParserConfig(usedAttributes: []);
         $lexer = new Lexer($config);
@@ -164,6 +166,7 @@ final readonly class ComponentsBuilder
                 'schemaName' => $schemaName,
                 'schema' => $schema,
                 'classReflector' => $reflector,
+                'examples' => $schemaAttrInstance->examples,
             ];
         }
 
@@ -225,6 +228,10 @@ final readonly class ComponentsBuilder
             }
 
             $schemas[$schemaInfo['schemaName']] = $schema;
+
+            foreach ($schemaInfo['examples'] as $name => $example) {
+                $schemasExamples[$name] = $example;
+            }
         }
 
         $schemas = array_replace_recursive($schemas, $schemasReplacements);

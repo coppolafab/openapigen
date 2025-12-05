@@ -14,6 +14,7 @@ final readonly class Schema
         public ?string $name = null,
         public ?array $schema = null,
         public bool $additionalProperties = false,
+        public array $examples = [],
     ) {
         if ($schema && ! $name) {
             throw new InvalidArgumentException('When schema is provided, name cannot be empty');
